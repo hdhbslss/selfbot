@@ -16,15 +16,12 @@
     "poll_interval": 6
   },
   "autoreg": {
-    "proxy_file": "proxies.txt",
     "delay_between": [4, 9]
   },
   "massjoin": {
-    "proxy_file": "proxies.txt",
     "delay_between": [3, 6]
   },
   "massdm": {
-    "proxy_file": "proxies.txt",
     "message_file": "dm_messages.txt",
     "repeat": 10,
     "delay_between": [1.5, 3.5]
