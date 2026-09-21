@@ -1,0 +1,32 @@
+{
+  "solver": {
+    "provider": "capsolver",
+    "api_key": "YOUR_CAPSOLVER_KEY",
+    "sitekey": "a9b5fb07-92ff-493f-86fe-352a2803b3df",
+    "siteurl": "https://discord.com/register"
+  },
+  "email": {
+    "mode": "imap_catchall",
+    "domain": "yourdomain.com",
+    "imap_host": "imap.yourdomain.com",
+    "imap_port": 993,
+    "imap_user": "catchall@yourdomain.com",
+    "imap_pass": "your_imap_password",
+    "poll_timeout": 180,
+    "poll_interval": 6
+  },
+  "autoreg": {
+    "proxy_file": "proxies.txt",
+    "delay_between": [4, 9]
+  },
+  "massjoin": {
+    "proxy_file": "proxies.txt",
+    "delay_between": [3, 6]
+  },
+  "massdm": {
+    "proxy_file": "proxies.txt",
+    "message_file": "dm_messages.txt",
+    "repeat": 10,
+    "delay_between": [1.5, 3.5]
+  }
+}
