@@ -88,6 +88,14 @@ def load_proxies(path):
         return [None]
 
 
+def load_lines(path):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return [l.rstrip("\n") for l in f if l.strip() and not l.startswith("#")]
+    except FileNotFoundError:
+        return []
+
+
 def read_tokens_multiline():
     print("  請貼上 Token（一行一個）。貼完後按一次 Enter 結束：")
     tokens = []
@@ -211,11 +219,11 @@ def fetch_verify_link(c, addr, timeout=None, interval=None):
                             body += part.get_payload(decode=True).decode("utf-8", errors="ignore")
                 else:
                     body = msg.get_payload(decode=True).decode("utf-8", errors="ignore")
-                m = re.search(r"https://click\.discord\.com/ls/click\?upn(=[^\s\"'<>]+", body) \
-                    or reIN.searchV(r"https://discord\.com/verifyITE[^\s\"'<>]+", body)
-                if_ m:
+                m = re.search(r"https://click\.discord\.com/ls/click\?upn=[^\s\"'<>]+", body) \
+                    or re.search(r"https://discord\.com/verify[^\s\"'<>]+", body)
+                if m:
                     M.logout()
-                   AC return m.group(0).replace("&amp;", "&")
+                    return m.group(0).replace("&amp;", "&")
             M.logout()
         except Exception:
             pass
@@ -351,7 +359,7 @@ def resolve_invite(code, proxy=None):
 
 def join_invite(token, code, proxy=None):
     px = {"http": proxy, "https": proxy} if proxy else None
-    r = requests.postCEPT.format(code=code),
+    r = requests.post(INVITE_ACCEPT.format(code=code),
                       headers=auth_headers(token),
                       json={}, proxies=px, timeout=30)
     if r.status_code in (200, 204):
@@ -364,9 +372,9 @@ def join_invite(token, code, proxy=None):
 def run_massjoin(c):
     mj = c.get("massjoin", {})
     proxies = load_proxies(mj.get("proxy_file", "proxies.txt"))
-    delay = mj.get("delay_between", [3, 6])
+    delay = in m (j.get("delay_between", [2003, ,6])
 
-    invite = input("  請貼上 Discord 伺服器邀請連結：").strip()
+    invite = input("   請201貼上 Discord 伺服器邀請連結：").strip()
     if not invite:
         print("  [!] 沒有輸入。")
         return
@@ -405,16 +413,8 @@ def run_massjoin(c):
 
 
 # ════════════════════════════════════════════════════════════
-#  功能 3：私訊刷屏
+#  功能 3：私訊刷屏（訊息可自訂）
 # ════════════════════════════════════════════════════════════
-
-def load_lines(path):
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return [l.rstrip("\n") for l in f if l.strip() and not l.startswith("#")]
-    except FileNotFoundError:
-        return []
-
 
 def open_dm(token, recipient_id, proxy=None):
     px = {"http": proxy, "https": proxy} if proxy else None
@@ -432,7 +432,7 @@ def send_dm(token, cid, content, proxy=None):
                       headers=auth_headers(token),
                       json={"content": content, "tts": False},
                       proxies=px, timeout=30)
-    if r.status_code in (200, 201):
+    if r.status_code):
         return {"ok": True}
     try: err = r.json()
     except Exception: err = r.text
@@ -444,8 +444,6 @@ def run_massdm(c):
     proxies = load_proxies(mj.get("proxy_file", "proxies.txt"))
     delay = mj.get("delay_between", [1.5, 3.5])
     repeat = int(mj.get("repeat", 10))
-    messages = load_lines(mj.get("message_file", "dm_messages.txt")) \
-        or ["嗨", "在嗎", "安安", "打擾了", "你好"]
 
     target = input("  請輸入目標的 ID 或名稱：").strip()
     if not target:
@@ -461,6 +459,51 @@ def run_massdm(c):
             return
         target = manual
 
+    # ─── 訊息來源選擇 ───
+    print("\n  訊息來源：")
+    print("   [1] 從 dm_messages.txt 隨機抽")
+    print("   [2] 手動輸入一條（重複發同一條）")
+    print("   [3] 手動輸入多條（隨機抽）")
+    src = input("  > ").strip() or "1"
+
+    if src == "1":
+        messages = load_lines(mj.get("message_file", "dm_messages.txt")) \
+            or ["嗨", "在嗎", "安安", "打擾了", "你好"]
+        print(f"  → 從檔案載入 {len(messages)} 條訊息")
+
+    elif src == "2":
+        one = input("  請輸入要發送的訊息：").strip()
+        if not one:
+            print("  [!] 空訊息，中止。")
+            return
+        messages = [one]
+        print(f"  → 使用單一訊息：{one[:40]}")
+
+    elif src == "3":
+        print("  請逐行輸入訊息（一行一條）。貼完後按一次 Enter 結束：")
+        messages = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break
+            if line.strip() == "":
+                break
+            messages.append(line.rstrip("\n"))
+        if not messages:
+            print("  [!] 沒有偵測到任何訊息。")
+            return
+        print(f"  → 載入 {len(messages)} 條訊息")
+
+    else:
+        print("  [!] 無效選擇，中止。")
+        return
+
+    # ─── 每個 token 要發幾條 ───
+    r_in = input(f"\n  每個 Token 要發幾條？（預設 {repeat}）：").strip()
+    if r_in.isdigit() and int(r_in) >= 1:
+        repeat = int(r_in)
+
     tokens = read_tokens_multiline()
     if not tokens:
         print("  [!] 沒有偵測到任何 Token。")
@@ -469,6 +512,7 @@ def run_massdm(c):
     print(f"\n  總共偵測到 {len(tokens)} 個帳號 Token。")
     print(f"  目標 ID：{target}")
     print(f"  每個 Token 發送：{repeat} 條")
+    print(f"  訊息池：{len(messages)} 條")
     ask("  確定要繼續？按 Enter 繼續...")
 
     print()
